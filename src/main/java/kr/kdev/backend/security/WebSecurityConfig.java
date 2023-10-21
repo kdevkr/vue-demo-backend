@@ -3,35 +3,34 @@ package kr.kdev.backend.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
-import org.springframework.security.web.server.csrf.ServerCsrfTokenRepository;
-import org.springframework.security.web.server.csrf.WebSessionServerCsrfTokenRepository;
-import org.springframework.security.web.server.csrf.XorServerCsrfTokenRequestAttributeHandler;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
+import org.springframework.security.web.csrf.XorCsrfTokenRequestAttributeHandler;
 
-@EnableWebFluxSecurity
+@EnableWebSecurity
 @Configuration
 public class WebSecurityConfig {
 
     @Bean
-    public ServerCsrfTokenRepository csrfTokenRepository() {
-        return new WebSessionServerCsrfTokenRepository();
+    public CsrfTokenRepository csrfTokenRepository() {
+        return new HttpSessionCsrfTokenRepository();
     }
 
     @Bean
-    public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // NOTE: Protection Against Exploits
         http.csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository())
-                .csrfTokenRequestHandler(new XorServerCsrfTokenRequestAttributeHandler()));
+                .csrfTokenRequestHandler(new XorCsrfTokenRequestAttributeHandler()));
 
-        http.securityContextRepository(new WebSessionServerSecurityContextRepository());
+        http.securityContext(sc -> sc.requireExplicitSave(false));
 
-        http.authorizeExchange(exchanges ->
-                exchanges.pathMatchers(HttpMethod.GET, "/csrf").permitAll()
-                        .pathMatchers("/ws/**").permitAll()
-                        .anyExchange().authenticated());
+        http.authorizeHttpRequests(request ->
+                request.requestMatchers(HttpMethod.GET, "/csrf").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .anyRequest().authenticated());
         return http.build();
     }
 }
