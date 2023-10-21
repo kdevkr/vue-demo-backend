@@ -1,0 +1,19 @@
+spring.application.name: backend
+spring.main.web-application-type: reactive
+spring.main.banner-mode: off
+server.port: 8080
+
+server.reactive.session:
+  timeout: 1h
+  cookie:
+    path: /
+    max-age: 1h
+    http-only: on
+    secure: on
+    same-site: strict
+
+spring.security.user:
+  name: user
+  password: password
+
+logging.pattern.dateformat: yyyy-MM-dd'T'hh:mm:ss.SSSZ
