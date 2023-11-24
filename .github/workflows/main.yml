@@ -18,7 +18,7 @@ jobs:
       - name: Checkout submodules
         run: |
           git submodule update --init backend
-          cd backend
+          cd backend/
           git checkout ${GITHUB_REF##*/}
 
       ###########################################
@@ -33,5 +33,6 @@ jobs:
           cache: 'gradle'
       - name: Build with Gradle
         run: |
+          cd backend/
           chmod +x ./gradlew
           ./gradlew build -x test
