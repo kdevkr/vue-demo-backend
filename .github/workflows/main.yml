@@ -17,9 +17,9 @@ jobs:
           repository: kdevkr/vue-demo
       - name: Checkout submodules
         run: |
-          git submodule update --init vue-demo-backend
-          cd vue-demo-backend
-          git checkout main
+          git submodule update --init backend
+          cd backend
+          git checkout ${GITHUB_REF##*/}
 
       ###########################################
       ## Java
