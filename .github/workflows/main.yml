@@ -1,0 +1,28 @@
+name: Checkout
+
+on:
+  workflow_dispatch:
+jobs:
+  checks:
+    name: Checks
+    runs-on: ubuntu-latest # ubuntu-22.04
+
+    strategy:
+      matrix:
+        java: [17]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      ###########################################
+      ## Java
+      ###########################################
+      - name: Set up JDK ${{ matrix.Java }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin # (https://github.com/marketplace/actions/setup-java-jdk#supported-distributions)
+          java-version: ${{ matrix.java }}
+          architecture: x64
+          cache: 'gradle'
+      - name: Build with Gradle
+        run: ./gradlew build -x test
