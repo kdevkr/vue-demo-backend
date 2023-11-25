@@ -2,6 +2,8 @@ name: Checkout
 
 on:
   workflow_dispatch:
+  pull_request:
+
 jobs:
   checks:
     name: Checks
@@ -12,9 +14,14 @@ jobs:
         java: [17]
 
     steps:
-      - uses: actions/checkout@v4
+      ###########################################
+      ## Checkout
+      ###########################################
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           repository: kdevkr/vue-demo
+          ref: main
       - name: Checkout submodules
         run: |
           git submodule update --init backend
@@ -24,7 +31,7 @@ jobs:
       ###########################################
       ## Java
       ###########################################
-      - name: Set up JDK ${{ matrix.Java }}
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v3
         with:
           distribution: temurin # (https://github.com/marketplace/actions/setup-java-jdk#supported-distributions)
@@ -36,3 +43,14 @@ jobs:
           cd backend/
           chmod +x ./gradlew
           ./gradlew build -x test
+
+      ###########################################
+      ## Checkstyle
+      ###########################################
+      - name: Run checkstyle
+        uses: nikitasavinov/checkstyle-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: 'github-pr-check'
+          tool_name: 'reviewdog'
+          checkstyle_config: 'google_checks.xml'
